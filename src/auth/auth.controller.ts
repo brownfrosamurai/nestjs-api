@@ -1,4 +1,13 @@
-import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpCode,
+  HttpStatus,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
+import { GetUserId } from 'src/common/decorators';
+import { AtGuard } from 'src/common/guards';
 import { AuthService } from './auth.service';
 import { AuthDto } from './dto';
 import { Tokens } from './types';
@@ -20,9 +29,10 @@ export class AuthController {
     return this.authService.signin(dto);
   }
 
+  @UseGuards(AtGuard)
   @Post('logout')
   @HttpCode(HttpStatus.OK)
-  logout() {
-    return this.authService.logout();
+  logout(@GetUserId() userId: number): Promise<boolean> {
+    return this.authService.logout(userId);
   }
 }

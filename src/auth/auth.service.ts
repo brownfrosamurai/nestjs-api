@@ -89,8 +89,16 @@ export class AuthService {
     }
   }
 
-  async logout() {
-    console.log({ data: 'logging out' });
+  async logout(userId: number): Promise<boolean> {
+    // Remove the hashed refresh token
+    await this.prisma.user.updateMany({
+      where: { id: userId },
+      data: {
+        hashedRt: null,
+      },
+    });
+
+    return true;
   }
   // Create access and refresh tokens
   async getTokens(userId: number, email: string): Promise<Tokens> {
