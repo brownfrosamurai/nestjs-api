@@ -100,6 +100,7 @@ export class AuthService {
 
     return true;
   }
+
   // Create access and refresh tokens
   async getTokens(userId: number, email: string): Promise<Tokens> {
     const jwtPayload: JwtPayload = {
