@@ -6,8 +6,9 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
-import { GetUserId } from 'src/common/decorators';
-import { AtGuard } from 'src/common/guards';
+import { GetUser, GetUserId } from 'src/common/decorators';
+import { Public } from 'src/common/decorators/public.decorator';
+import { RtGuard } from 'src/common/guards';
 import { AuthService } from './auth.service';
 import { AuthDto } from './dto';
 import { Tokens } from './types';
@@ -16,6 +17,7 @@ import { Tokens } from './types';
 export class AuthController {
   constructor(private authService: AuthService) {}
 
+  @Public()
   @Post('signup')
   @HttpCode(HttpStatus.CREATED)
   signup(@Body() dto: AuthDto): Promise<Tokens> {
@@ -23,16 +25,28 @@ export class AuthController {
     return this.authService.signup(dto);
   }
 
+  @Public()
   @Post('signin')
   @HttpCode(HttpStatus.OK)
   signin(@Body() dto: AuthDto): Promise<Tokens> {
     return this.authService.signin(dto);
   }
 
-  @UseGuards(AtGuard)
+  // @Public()
   @Post('logout')
   @HttpCode(HttpStatus.OK)
   logout(@GetUserId() userId: number): Promise<boolean> {
     return this.authService.logout(userId);
+  }
+
+  @Public()
+  @UseGuards(RtGuard)
+  @Post('refresh')
+  @HttpCode(HttpStatus.OK)
+  refreshTokens(
+    @GetUserId() userId: number,
+    @GetUser('refreshToken') refreshToken: string,
+  ): Promise<Tokens> {
+    return this.authService.refreshTokens(userId, refreshToken);
   }
 }

@@ -101,6 +101,28 @@ export class AuthService {
     return true;
   }
 
+  async refreshTokens(userId: number, rt: string): Promise<Tokens> {
+    // check if user exist
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+    if (!user || user.hashedRt === null)
+      throw new ForbiddenException('Access denied');
+
+    // check if the hashedRt and rt match
+    const rtMatches = await argon.verify(user.hashedRt, rt);
+    if (!rtMatches) throw new ForbiddenException('Access denied');
+
+    // generate tokens
+    const tokens = await this.getTokens(user.id, user.email);
+
+    // update hashed rt in database
+    await this.updateRtHash(user.id, rt);
+
+    // return tokens as json
+    return tokens;
+  }
+
   // Create access and refresh tokens
   async getTokens(userId: number, email: string): Promise<Tokens> {
     const jwtPayload: JwtPayload = {
