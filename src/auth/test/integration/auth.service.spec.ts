@@ -4,6 +4,7 @@ import { AppModule } from '../../../app.module';
 import { AuthService } from '../../auth.service';
 import { Tokens } from '../../types';
 import { PrismaService } from '../../../prisma/prisma.service';
+import { decode } from 'jsonwebtoken';
 
 const user = {
   email: 'test@test.com',
@@ -143,5 +144,101 @@ describe('Auth flow', () => {
 
       expect(userFromDb?.hashedRt).toBeFalsy();
     });
-  }); //
+  });
+
+  describe('refresh', () => {
+    beforeAll(async () => {
+      await prisma.cleanDatabase();
+    });
+
+    it('should throw error if no existing user', async () => {
+      let tokens: Tokens | undefined;
+      try {
+        tokens = await authService.refreshTokens(1, '');
+      } catch (error) {
+        expect(error.status).toBe(403);
+      }
+
+      expect(tokens).toBeUndefined();
+    });
+
+    it('should throw if user is logged out', async () => {
+      // signup and save refresh token
+      const _tokens = await authService.signup({
+        email: user.email,
+        password: user.password,
+      });
+      // get refresh token
+      const rt = _tokens.refresh_token;
+
+      // get id from user
+      const decoded = decode(rt);
+      const userId = Number(decoded?.sub);
+
+      await authService.logout(userId);
+
+      let tokens: Tokens | undefined;
+
+      try {
+        tokens = await authService.refreshTokens(userId, rt);
+      } catch (error) {
+        expect(error.status).toBe(403);
+      }
+
+      expect(tokens).toBeUndefined();
+    });
+
+    it('should throw if refresh token is incorrect', async () => {
+      await prisma.cleanDatabase();
+
+      const _tokens = await authService.signup({
+        email: user.email,
+        password: user.password,
+      });
+
+      const rt = _tokens.refresh_token;
+
+      const decoded = decode(rt);
+      const userId = Number(decoded?.sub);
+
+      let tokens: Tokens | undefined;
+
+      try {
+        tokens = await authService.refreshTokens(userId, rt + '25sg');
+      } catch (error) {
+        expect(error.status).toBe(403);
+      }
+
+      expect(tokens).toBeUndefined();
+    });
+
+    it('should refresh tokens', async () => {
+      await prisma.cleanDatabase();
+      // log in the user again and save rt + at
+      const _tokens = await authService.signup({
+        email: user.email,
+        password: user.password,
+      });
+
+      const rt = _tokens.refresh_token;
+      const at = _tokens.access_token;
+
+      const decoded = decode(rt);
+      const userId = Number(decoded?.sub);
+
+      // since jwt uses seconds signature we need to wait for 1 second to have new jwts
+      await new Promise((resolve, reject) => {
+        setTimeout(() => {
+          resolve(true);
+        }, 1000);
+      });
+
+      const tokens = await authService.refreshTokens(userId, rt);
+      expect(tokens).toBeDefined();
+
+      // refreshed tokens should be different
+      expect(tokens.access_token).not.toBe(at);
+      expect(tokens.refresh_token).not.toBe(rt);
+    });
+  });
 });
