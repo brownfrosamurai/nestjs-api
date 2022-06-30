@@ -6,6 +6,7 @@ export class PrismaService
   extends PrismaClient
   implements OnModuleInit, OnModuleDestroy
 {
+  [x: string]: any;
   constructor(config: ConfigService) {
     const url = config.get('DATABASE_URL');
     super({

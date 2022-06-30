@@ -6,9 +6,9 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
-import { GetUser, GetUserId } from 'src/common/decorators';
-import { Public } from 'src/common/decorators/public.decorator';
-import { RtGuard } from 'src/common/guards';
+import { GetUser, GetUserId } from '../common/decorators';
+import { Public } from '../common/decorators/public.decorator';
+import { RtGuard } from '../common/guards';
 import { AuthService } from './auth.service';
 import { AuthDto } from './dto';
 import { Tokens } from './types';
