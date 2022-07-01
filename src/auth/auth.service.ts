@@ -42,10 +42,13 @@ export class AuthService {
           hash,
         },
       });
+
       // create access and refresh tokens
       const tokens = await this.getTokens(user.id, user.email);
+
       // update current hashed refresh token(hashedRt)in db
       await this.updateRtHash(user.id, tokens.refresh_token);
+
       // return tokens as json
       return tokens;
     } catch (error) {
@@ -60,7 +63,7 @@ export class AuthService {
   // Signin logic
   async signin(dto: AuthDto): Promise<Tokens> {
     try {
-      // find user
+      // find user by email
       const user = await this.prisma.user.findUnique({
         where: { email: dto.email },
       });
@@ -79,6 +82,7 @@ export class AuthService {
 
       // update hashed refresh token after sign in
       await this.updateRtHash(user.id, tokens.refresh_token);
+
       // return tokens as json
       return tokens;
     } catch (error) {
@@ -102,7 +106,7 @@ export class AuthService {
   }
 
   async refreshTokens(userId: number, rt: string): Promise<Tokens> {
-    // check if user exist
+    // check if user exist or if user is already logged out
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
     });

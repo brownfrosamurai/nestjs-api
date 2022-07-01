@@ -17,6 +17,8 @@ import { Tokens } from './types';
 export class AuthController {
   constructor(private authService: AuthService) {}
 
+  // The @Public() decorator makes an endpoint impurvious to the access token guard which is initialized in the app module at a more global scope
+
   @Public()
   @Post('signup')
   @HttpCode(HttpStatus.CREATED)
@@ -32,7 +34,6 @@ export class AuthController {
     return this.authService.signin(dto);
   }
 
-  // @Public()
   @Post('logout')
   @HttpCode(HttpStatus.OK)
   logout(@GetUserId() userId: number): Promise<boolean> {

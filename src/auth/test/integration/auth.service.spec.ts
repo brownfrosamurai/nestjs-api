@@ -17,10 +17,12 @@ describe('Auth flow', () => {
   let moduleRef: TestingModule;
 
   beforeAll(async () => {
+    // create test module
     moduleRef = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
 
+    // add prisma and auth service to test module
     prisma = moduleRef.get(PrismaService);
     authService = moduleRef.get(AuthService);
   });
@@ -29,6 +31,7 @@ describe('Auth flow', () => {
     await moduleRef.close();
   });
 
+  // test signup logic
   describe('signup', () => {
     beforeAll(async () => {
       await prisma.cleanDatabase();
@@ -59,6 +62,7 @@ describe('Auth flow', () => {
     });
   });
 
+  // test signin logic
   describe('signin', () => {
     beforeAll(async () => {
       await prisma.cleanDatabase();
@@ -108,6 +112,7 @@ describe('Auth flow', () => {
     });
   });
 
+  // test logout logic
   describe('logout', () => {
     beforeAll(async () => {
       await prisma.cleanDatabase();
@@ -146,6 +151,7 @@ describe('Auth flow', () => {
     });
   });
 
+  // test refresh token logic
   describe('refresh', () => {
     beforeAll(async () => {
       await prisma.cleanDatabase();
@@ -195,9 +201,10 @@ describe('Auth flow', () => {
         email: user.email,
         password: user.password,
       });
-
+      // get refresh token
       const rt = _tokens.refresh_token;
 
+      // get id from user
       const decoded = decode(rt);
       const userId = Number(decoded?.sub);
 
@@ -214,7 +221,7 @@ describe('Auth flow', () => {
 
     it('should refresh tokens', async () => {
       await prisma.cleanDatabase();
-      // log in the user again and save rt + at
+      // log in the user again and save rt and at
       const _tokens = await authService.signup({
         email: user.email,
         password: user.password,
@@ -223,6 +230,7 @@ describe('Auth flow', () => {
       const rt = _tokens.refresh_token;
       const at = _tokens.access_token;
 
+      // get id from user
       const decoded = decode(rt);
       const userId = Number(decoded?.sub);
 
