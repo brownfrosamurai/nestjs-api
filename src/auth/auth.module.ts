@@ -5,7 +5,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { AtStrategy, RtStrategy } from './strategies';
 
 @Module({
-  imports: [JwtModule.register({})],
+  imports: [JwtModule.register({})], //register jwt module
   controllers: [AuthController],
   providers: [AuthService, AtStrategy, RtStrategy], // Providers for the auth module
 })

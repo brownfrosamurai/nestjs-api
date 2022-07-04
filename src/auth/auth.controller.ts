@@ -18,7 +18,6 @@ export class AuthController {
   constructor(private authService: AuthService) {}
 
   // The @Public() decorator makes an endpoint impurvious to the access token guard which is initialized in the app module at a more global scope
-
   @Public()
   @Post('signup')
   @HttpCode(HttpStatus.CREATED)
