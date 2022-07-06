@@ -7,7 +7,7 @@ import {
   Patch,
 } from '@nestjs/common';
 import { User } from '@prisma/client';
-import { GetUserId } from 'src/common/decorators';
+import { GetUser, GetUserId } from 'src/common/decorators';
 import { EditUserDto } from './dto';
 import { UserService } from './user.service';
 
@@ -23,8 +23,8 @@ export class UserController {
 
   @Get()
   @HttpCode(HttpStatus.OK)
-  getMe(@GetUserId() userId: number): Promise<User> {
-    return this.userService.getMe(userId);
+  getMe(@GetUser() user: User) {
+    return user;
   }
 
   @Patch()
