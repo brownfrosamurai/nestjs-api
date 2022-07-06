@@ -16,8 +16,11 @@ model User {
   updatedAt DateTime @default(now())
 
   email String   @unique
-  hash  String
+  hash  String 
   hashedRt String?
+
+  firstName String?
+  lastName String?
 
   @@map("users")
 }
