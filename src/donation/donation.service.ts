@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { Donation } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { MakeDonation } from './dto';
@@ -8,6 +8,9 @@ export class DonationService {
   constructor(private prisma: PrismaService) {}
 
   async makeDonation(userId: number, dto: MakeDonation): Promise<Donation> {
+    if (dto.amount <= 0)
+      throw new BadRequestException('Please provide valid amount');
+
     const donation = await this.prisma.donation.create({
       data: { userId, ...dto },
     });
