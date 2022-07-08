@@ -15,12 +15,35 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
 
-  email String   @unique
-  hash  String 
+  email    String  @unique
+  hash     String
   hashedRt String?
 
   firstName String?
-  lastName String?
+  lastName  String?
+
+  donations Donation[]
 
   @@map("users")
+}
+
+model Donation {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  amount Float
+  allocation Allocation @default(ALL_POLUTION)
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("donations")
+  userId Int
+}
+
+enum Allocation {
+  LAND_POLUTION
+  SEA_POLUTION
+  AIR_POLUTION
+  ALL_POLUTION
 }
